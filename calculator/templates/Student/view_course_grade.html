@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Lexend&display=swap" rel="stylesheet">
+
+    <title>Student Dashboard</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Lexend', sans-serif;
+        }
+
+        #logout {
+            background-color: #7FFFD4;
+        }
+
+        .container-fluid {
+            padding-left: 0;
+        }
+        .sidebar
+        {
+            position: absolute;
+            height: 100%;
+            width: 250px;
+            background-color: #6CB4EE;
+            flex: left;
+        }
+
+        .sidebar li
+        {
+            padding-top: 20px;
+            padding-bottom: 10px;
+            height: 100%;
+            display: block;
+            margin: auto;
+        }
+
+        .sidebar ul li:hover
+        {
+            padding-left: 10px;
+            transition: .3s;
+        }
+
+        .helloname {
+            padding-top: 20px;
+            padding-left: 10px;
+        }
+
+        .nav-link {
+            color: black;
+        }
+
+        .content {
+            width: 50%;
+            min-width: 500px;
+            position: relative;
+            padding-left: 100px;
+            padding-top: 50px;
+            margin-left: clamp(250px, 30vw, 300px);
+        }
+
+        .content .first {
+            display: inline-block;
+            flex: left;
+            padding-left: 10%
+        }
+
+        .content .second {
+            display: inline-block;
+            padding-right: 10%;
+            float: right;
+            padding-left: 25%;
+        }
+
+        .content a{
+            padding-top: 10%;
+            padding-left: 10%;
+            text-align: center;
+            color: #318CE7;
+        }
+
+        .card {
+            background-color: #CCCCFF;
+
+        }
+
+        .content a:hover{
+            color: #318CE7;
+
+        }
+    </style>
+  </head>
+  <body>
+
+    <nav class="navbar navbar-light" style="background-color: #e3f2fd;">
+        <a class="navbar-brand" href="#">Student Dashboard</a>
+        <form id="logout_form" method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <a class="nav-link" id="logout" href="javascript:{}" onclick="document.getElementById('logout_form').submit();">Logout</a>
+        </form>
+    </nav>
+    <div class="container-fluid">
+        <div class="sidebar">
+            <ul>
+                <h4 class="helloname">Hello, {{e1.first_name}}</h4>
+                <li><a class="nav-link" href="{% url 'view_profile_student' %}">
+                    <svg class="bi bi-chevron-right" width="16" height="16" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M6.646 3.646a.5.5 0 01.708 0l6 6a.5.5 0 010 .708l-6 6a.5.5 0 01-.708-.708L12.293 10 6.646 4.354a.5.5 0 010-.708z"/></svg>
+                    Profile
+                </a></li>
+                <li><a class="nav-link" href="{% url 'view_marks' %}">
+                    <svg class="bi bi-chevron-right" width="16" height="16" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M6.646 3.646a.5.5 0 01.708 0l6 6a.5.5 0 010 .708l-6 6a.5.5 0 01-.708-.708L12.293 10 6.646 4.354a.5.5 0 010-.708z"/></svg>
+                    View Marks
+                </a></li>
+                <li><a class="nav-link" href="{% url 'student_view_course' %}">
+                    <svg class="bi bi-chevron-right" width="16" height="16" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M6.646 3.646a.5.5 0 01.708 0l6 6a.5.5 0 010 .708l-6 6a.5.5 0 01-.708-.708L12.293 10 6.646 4.354a.5.5 0 010-.708z"/></svg>
+                    Grading Scheme
+                </a></li>
+                <li><a class="nav-link" href="{% url 'events' %}">
+                    <svg class="bi bi-chevron-right" width="16" height="16" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M6.646 3.646a.5.5 0 01.708 0l6 6a.5.5 0 010 .708l-6 6a.5.5 0 01-.708-.708L12.293 10 6.646 4.354a.5.5 0 010-.708z"/></svg>
+                    Events
+                </a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="content">
+        <h4 class="font-weight-bol text-center">Select the course you want to view</h4>
+        <div class="row row-cols-2">
+            {% for entry in e2 %}
+                <div class="col">
+                    <div class="card mt-5" style="width: 18rem; height: 10rem;">
+                        <div class="card-body m-auto">
+                            <a class="nav-link" href="{% url 'student_view_grade' entry.course_title %}">
+                                <h5 class="card-title" style="padding-top: 50%; width: 120%;">{{entry.course_title}}</h5>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+  </body>
+</html>
+

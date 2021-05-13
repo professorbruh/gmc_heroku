@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Lexend&display=swap" rel="stylesheet">
+
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
+
+    <title>Advisor Dashboard</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Lexend', sans-serif;
+        }
+
+        #logout {
+            background-color: #7FFFD4;
+        }
+
+        .container-fluid {
+            padding-left: 0;
+        }
+        .sidebar
+        {
+            position: absolute;
+            height: 100%;
+            width: 250px;
+            background-color: #6CB4EE;
+            flex: left;
+        }
+
+        .sidebar li
+        {
+            padding-top: 20px;
+            padding-bottom: 10px;
+            height: 100%;
+            display: block;
+            margin: auto;
+        }
+
+        .sidebar ul li:hover
+        {
+            padding-left: 10px;
+            transition: .3s;
+        }
+
+        .helloname {
+            padding-top: 20px;
+            padding-left: 10px;
+        }
+
+        .nav-link {
+            color: black;
+        }
+
+        .content {
+            width: 50%;
+            min-width: 500px;
+            position: relative;
+            padding-left: 100px;
+            padding-top: 50px;
+            margin-left: clamp(250px, 30vw, 300px);
+        }
+
+        .content .first {
+            display: inline-block;
+            flex: left;
+            padding-left: 10%
+        }
+
+        .content .second {
+            display: inline-block;
+            padding-right: 10%;
+            float: right;
+            padding-left: 25%;
+        }
+
+        .content a{
+            padding-top: 10%;
+            padding-left: 10%;
+            text-align: center;
+            color: #318CE7;
+        }
+
+        .content .inline h5{
+            display: inline-block;
+            padding-left: 0px;
+            padding-right: 20px;
+            padding-bottom: 20px;
+        }
+    </style>
+    <script>
+        $(document).ready(function(){
+            $('#p1').on('keyup', function(){
+                var value = parseInt($(this).val()) - 1;
+                $('#c1').val(value);
+            });
+
+            $('#p2').on('keyup', function(){
+                var value = parseInt($(this).val()) - 1;
+                $('#c2').val(value);
+            });
+
+            $('#p3').on('keyup', function(){
+                var value = parseInt($(this).val()) - 1;
+                $('#c3').val(value);
+            });
+        });
+    </script>
+  </head>
+  <body>
+
+    <nav class="navbar navbar-light" style="background-color: #e3f2fd;">
+        <a class="navbar-brand" href="#">Advisor Dashboard</a>
+        <form id="logout_form" method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <a class="nav-link" id="logout" href="javascript:{}" onclick="document.getElementById('logout_form').submit();">Logout</a>
+        </form>
+    </nav>
+    <div class="container-fluid">
+        <div class="sidebar">
+            <ul>
+                <h4 class="helloname">Hello, {{e1.first_name}}</h4>
+                <li><a class="nav-link" href="{% url 'view_profile_advisor' %}">
+                    <svg class="bi bi-chevron-right" width="16" height="16" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M6.646 3.646a.5.5 0 01.708 0l6 6a.5.5 0 010 .708l-6 6a.5.5 0 01-.708-.708L12.293 10 6.646 4.354a.5.5 0 010-.708z"/></svg>
+                    Profile
+                </a></li>
+                <li><a class="nav-link" href="{% url 'class_details' %}">
+                    <svg class="bi bi-chevron-right" width="16" height="16" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M6.646 3.646a.5.5 0 01.708 0l6 6a.5.5 0 010 .708l-6 6a.5.5 0 01-.708-.708L12.293 10 6.646 4.354a.5.5 0 010-.708z"/></svg>
+                    Class Details
+                </a></li>
+                <li><a class="nav-link" href="{% url 'view_marks_advisor' %}">
+                    <svg class="bi bi-chevron-right" width="16" height="16" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M6.646 3.646a.5.5 0 01.708 0l6 6a.5.5 0 010 .708l-6 6a.5.5 0 01-.708-.708L12.293 10 6.646 4.354a.5.5 0 010-.708z"/></svg>
+                    View Marks
+                </a></li>
+                <li><a class="nav-link" href="{% url 'view_course_advisor' %}">
+                    <svg class="bi bi-chevron-right" width="16" height="16" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M6.646 3.646a.5.5 0 01.708 0l6 6a.5.5 0 010 .708l-6 6a.5.5 0 01-.708-.708L12.293 10 6.646 4.354a.5.5 0 010-.708z"/></svg>
+                    Grading Scheme
+                </a></li>
+                <li><a class="nav-link" href="{% url 'approve_events' %}">
+                    <svg class="bi bi-chevron-right" width="16" height="16" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M6.646 3.646a.5.5 0 01.708 0l6 6a.5.5 0 010 .708l-6 6a.5.5 0 01-.708-.708L12.293 10 6.646 4.354a.5.5 0 010-.708z"/></svg>
+                    Approve Marks
+                </a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="content">
+        <h4 class="font-weight-bol mb-3 text-center">Grades</h4>
+        <div class="inline">
+            <h5 class="font-weight-bold first" >Course ID: </h5>
+            <h5>{{e2.course_title_id}}</h5>
+        </div>
+        <form class="mt-3" method="POST" action="">
+
+            {% csrf_token %}
+
+            <table class="table table-hover table-striped">
+
+              <thead>
+                <tr>
+                  <th scope="col">Grade</th>
+                  <th scope="col">From</th>
+                  <th scope="col">To</th>
+                </tr>
+              </thead>
+              <tbody>
+                    <tr>
+                        <td>A</td>
+                        <td>
+                            <div class="form-group" style="max-width: 200px;">
+                                <input type="text" class="form-control" name="fromA" value={{e2.fromA}} id='p1' disabled>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="form-group" style="max-width: 200px;">
+                                <input class="form-control" type="text" name="toA" value={{e2.toA}} disabled>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>B</td>
+                        <td>
+                            <div class="form-group" style="max-width: 200px;">
+                                <input class="form-control" type="text" name="fromB" value={{e2.fromB}} id='p2' disabled>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="form-group" style="max-width: 200px;">
+                                <input type="text" class="form-control" name="toB" value={{e2.toB}} id='c1' disabled>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>C</td>
+                        <td>
+                            <div class="form-group" style="max-width: 200px;">
+                                <input class="form-control" type="text"  name="fromC" value={{e2.fromC}} id='p3' disabled>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="form-group" style="max-width: 200px;">
+                                <input type="text" class="form-control" name="toC" value={{e2.toC}} id='c2' disabled>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>F</td>
+                        <td>
+                            <div class="form-group" style="max-width: 200px;">
+                                <input class="form-control" type="text"  name="fromF" value={{e2.fromF}} disabled>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="form-group" style="max-width: 200px;">
+                                <input type="text" class="form-control" name="toF" value={{e2.toF}} id='c3' disabled>
+                            </div>
+                        </td>
+                    </tr>
+              </tbody>
+
+            </table>
+
+            <div class="inline">
+                <h5 class="font-weight-bold first" >Credit:  </h5>
+                <div class="form-group" style="max-width: 75px;">
+                    <input type="number" class="form-control" name="credit" value={{e2.credits}} disabled>
+                </div>
+            </div>
+        </form>
+
+
+
+    </div>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+  </body>
+</html>
+
