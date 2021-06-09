@@ -3,6 +3,9 @@ from django.contrib.auth import authenticate, login, logout, update_session_auth
 from django.contrib.auth.forms import PasswordChangeForm, PasswordResetForm
 from django.contrib import messages
 from .models import *
+from itertools import combinations
+
+grades_points = {'A': 10, 'B': 8, 'C': 6, 'F': 0}
 
 
 def login_view(request):
@@ -110,7 +113,6 @@ def view_marks_advisor_view(request):
     entry1 = Advisor.objects.get(username=username)
     entry2 = Course.objects.filter(year=entry1.year)
     entry3 = Student.objects.filter(year=entry1.year)
-
     roll = {}
     for i in entry3:
         roll[i.username] = i.roll_number
@@ -126,6 +128,7 @@ def view_marks_advisor_view(request):
     print(course_mark)
 
     context = {'e1': entry1, 'e2': entry2, 'e3': entry3, 'roll': roll, 'mark': course_mark}
+    print(entry3)
     return render(request, 'Advisor/view_marks.html', context)
 
 
@@ -369,6 +372,196 @@ def update_grade_view(request, course_title):
     entry2 = Grade.objects.get(course_title=course_title)
     context = {'e1': entry1, 'e2': entry2}
     return render(request, 'COE/modify_grade.html', context)
+
+
+def view_year_view(request):
+    username = request.user.username
+    entry1 = Coe.objects.get(username=username)
+
+    context = {'e1': entry1}
+    return render(request, 'COE/view_year.html', context)
+
+
+def grace_mark_calculate_view(request, year):
+    if request.method == 'POST':
+        username = request.user.username
+        coe_entry = Coe.objects.get(username=username)
+        bool_entry = BoolCheck.objects.get(s_no=1)
+
+        coe_entry.grace_mark_applied = True
+        coe_entry.save(update_fields=['grace_mark_applied'])
+        bool_entry.grace_mark_applied = True
+        bool_entry.save(update_fields=['grace_mark_applied'])
+
+        student_entry = Student.objects.filter(year=year)
+        course_entry = Course.objects.filter(year=year)
+
+        username_course_marks = {}
+        username_grace_marks = {}
+
+        for student in student_entry:
+            username_grace_marks[student.username] = student.grace_marks
+            username_course_marks[student.username] = {}
+
+            mark_entry = Mark.objects.filter(username=student.username)
+            for subject in mark_entry:
+                course_title = subject.course_title_id
+                marks = subject.marks
+                username_course_marks[student.username][course_title] = marks
+
+        course_credit = {}
+        course_range_marks = {}
+        course_list = []
+
+        for course in course_entry:
+            course_range_marks[course.course_title] = {}
+            course_list.append(course.course_title)
+            grade_entry = Grade.objects.get(course_title=course.course_title)
+            course_range_marks[course.course_title]['fromA'] = grade_entry.fromA
+            course_range_marks[course.course_title]['fromB'] = grade_entry.fromB
+            course_range_marks[course.course_title]['fromC'] = grade_entry.fromC
+            course_range_marks[course.course_title]['fromF'] = grade_entry.fromF
+            course_range_marks[course.course_title]['toA'] = grade_entry.toA
+            course_range_marks[course.course_title]['toB'] = grade_entry.toA
+            course_range_marks[course.course_title]['toC'] = grade_entry.toA
+            course_range_marks[course.course_title]['toF'] = grade_entry.toA
+            course_credit[course.course_title] = grade_entry.credits
+
+        username_course_gpa = {}
+
+        for student in username_course_marks:
+            username_course_gpa[student] = {}
+            for subject in username_course_marks[student]:
+                marks = username_course_marks[student][subject]
+                course = subject
+
+                if course_range_marks[course]['fromA'] <= marks <= course_range_marks[course]['toA']:
+                    username_course_gpa[student][course] = 10 * int(course_credit[course])
+                elif course_range_marks[course]['fromB'] <= marks <= course_range_marks[course]['toB']:
+                    username_course_gpa[student][course] = 8 * int(course_credit[course])
+                elif course_range_marks[course]['fromC'] <= marks <= course_range_marks[course]['toC']:
+                    username_course_gpa[student][course] = 6 * int(course_credit[course])
+                else:
+                    username_course_gpa[student][course] = 0
+
+        total_credits = 0
+        for course in course_credit:
+            total_credits += int(course_credit[course])
+        username_cgpa = {}
+
+        for student in username_course_gpa:
+            total_gpa = 0
+            for subject in username_course_gpa[student]:
+                total_gpa += int(username_course_gpa[student][subject])
+            username_cgpa[student] = total_gpa / total_credits
+
+        course_combinations = list(combinations(course_list, 3))
+        print(username_course_marks)
+        print(username_cgpa)
+
+        for student in student_entry:
+            best_marks = {}
+            best_marks[student.username] = {}
+            username = student.username
+            for combination in course_combinations:
+                temp_course_marks = {}
+                for it in username_course_marks[username]:
+                    temp_course_marks[it] = username_course_marks[username][it]
+
+                temp_course_gpa = {}
+                for it in username_course_gpa[username]:
+                    temp_course_gpa[it] = username_course_gpa[username][it]
+
+                temp_grace_marks = username_grace_marks[username]
+
+                subject_order_list = []
+                for subject in combination:
+                    marks = username_course_marks[username][subject]
+                    if course_range_marks[subject]['fromA'] <= marks <= course_range_marks[subject]['toA']:
+                        continue
+                    elif course_range_marks[subject]['fromB'] <= marks <= course_range_marks[subject]['toB']:
+                        needed = course_range_marks[subject]['fromA'] - marks
+                        subject_order_list.append((1, needed, subject))
+                    elif course_range_marks[subject]['fromC'] <= marks <= course_range_marks[subject]['toC']:
+                        needed = course_range_marks[subject]['fromB'] - marks
+                        subject_order_list.append((1, needed, subject))
+                    else:
+                        needed = course_range_marks[subject]['fromC'] - marks
+                        subject_order_list.append((0, needed, subject))
+
+                subject_order_list.sort()
+                if len(subject_order_list) == 0:
+                    continue
+                else:
+                    for it in subject_order_list:
+                        needed = it[1]
+                        subject = it[2]
+                        if temp_grace_marks >= needed:
+                            temp_grace_marks -= needed
+                            temp_course_marks[subject] += needed
+                        else:
+                            continue
+
+                for course in temp_course_marks:
+                    marks = temp_course_marks[course]
+                    if course_range_marks[course]['fromA'] <= marks <= course_range_marks[course]['toA']:
+                        temp_course_gpa[course] = 10 * int(course_credit[course])
+                    elif course_range_marks[course]['fromB'] <= marks <= course_range_marks[course]['toB']:
+                        temp_course_gpa[course] = 8 * int(course_credit[course])
+                    elif course_range_marks[course]['fromC'] <= marks <= course_range_marks[course]['toC']:
+                        temp_course_gpa[course] = 6 * int(course_credit[course])
+                    else:
+                        temp_course_gpa[course] = 0
+
+                temp_cgpa = 0
+                for gpa in temp_course_gpa:
+                    temp_cgpa += temp_course_gpa[gpa]
+                temp_cgpa = temp_cgpa / total_credits
+                if username_cgpa[username] < temp_cgpa:
+                    username_cgpa[username] = temp_cgpa
+                    best_marks[username] = temp_course_marks
+            count = 0
+            for it in best_marks[username]:
+                count += 1
+            if count > 0:
+                username_course_marks[username] = best_marks[username]
+        print(username_course_marks)
+        print(username_cgpa)
+
+        for student in student_entry:
+            student_row_entry = Student.objects.get(username=student.username)
+            student_row_entry.grace_marks = 0
+            student_row_entry.cgpa = username_cgpa[student.username]
+            student_row_entry.save(update_fields=['grace_marks', 'cgpa'])
+            mark_entry = Mark.objects.filter(username=student.username)
+            for subject in mark_entry:
+                title = subject.course_title_id
+                marks = username_course_marks[student.username][title]
+                subject.marks = marks
+                subject.save(update_fields=['marks'])
+
+    username = request.user.username
+    entry1 = Coe.objects.get(username=username)
+    entry2 = Course.objects.filter(year=year)
+    entry3 = Student.objects.filter(year=year)
+
+    roll = {}
+    grace = {}
+    credit = {}
+    for i in entry3:
+        roll[i.username] = i.roll_number
+        grace[i.username] = i.grace_marks
+
+    course_mark = {}
+    for i in entry2:
+        course_mark[i.course_title] = {}
+        credit[i.course_title] = Grade.objects.get(course_title=i.course_title).credits
+        entry4 = Mark.objects.filter(course_title=i.course_title)
+        for j in entry4:
+            course_mark[i.course_title][j.username_id] = j.marks
+
+    context = {'e1': entry1, 'e2': entry2, 'e3': entry3, 'roll': roll, 'mark': course_mark, 'grace': grace, 'credit': credit}
+    return render(request, 'COE/grace_mark_calculate.html', context)
 
 
 def advisor_change_password_view(request):

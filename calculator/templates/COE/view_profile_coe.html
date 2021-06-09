@@ -114,13 +114,17 @@
         <div class="sidebar">
             <ul>
                 <h4 class="helloname">Hello, {{e1.first_name}}</h4>
-                <li><a class="nav-link" href="view_profile">
+                <li><a class="nav-link" href="{% url 'view_profile_coe' %}">
                     <svg class="bi bi-chevron-right" width="16" height="16" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M6.646 3.646a.5.5 0 01.708 0l6 6a.5.5 0 010 .708l-6 6a.5.5 0 01-.708-.708L12.293 10 6.646 4.354a.5.5 0 010-.708z"/></svg>
                     Profile
                 </a></li>
-                <li><a class="nav-link" href="view_course">
+                <li><a class="nav-link" href="{% url 'view_course_coe' %}">
                     <svg class="bi bi-chevron-right" width="16" height="16" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M6.646 3.646a.5.5 0 01.708 0l6 6a.5.5 0 010 .708l-6 6a.5.5 0 01-.708-.708L12.293 10 6.646 4.354a.5.5 0 010-.708z"/></svg>
                     Grading Scheme
+                </a></li>
+                <li><a class="nav-link" href="{% url 'view_level' %}">
+                    <svg class="bi bi-chevron-right" width="16" height="16" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M6.646 3.646a.5.5 0 01.708 0l6 6a.5.5 0 010 .708l-6 6a.5.5 0 01-.708-.708L12.293 10 6.646 4.354a.5.5 0 010-.708z"/></svg>
+                    Apply Grace Marks
                 </a></li>
             </ul>
         </div>
