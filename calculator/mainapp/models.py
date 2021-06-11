@@ -9,7 +9,7 @@ class Student(models.Model):
     last_name = models.CharField(max_length=30)
     year = models.IntegerField(default=1, validators=[MinValueValidator(1), MaxValueValidator(4)])
     grace_marks = models.IntegerField(default=0, validators=[MinValueValidator(0), MaxValueValidator(20)])
-    cgpa = models.IntegerField(default=0, validators=[MinValueValidator(0), MaxValueValidator(10)])
+    cgpa = models.FloatField(default=0.0, validators=[MinValueValidator(0.0), MaxValueValidator(10.0)])
 
 
 class Advisor(models.Model):
@@ -76,3 +76,8 @@ class Event(models.Model):
 class BoolCheck(models.Model):
     s_no = models.IntegerField(default=1)
     grace_mark_applied = models.BooleanField(default=False)
+
+
+class Lock(models.Model):
+    username = models.CharField(max_length=20)
+    timestamp = models.DateTimeField()

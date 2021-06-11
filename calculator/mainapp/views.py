@@ -4,59 +4,87 @@ from django.contrib.auth.forms import PasswordChangeForm, PasswordResetForm
 from django.contrib import messages
 from .models import *
 from itertools import combinations
+from datetime import *
 
 grades_points = {'A': 10, 'B': 8, 'C': 6, 'F': 0}
 
 
 def login_view(request):
     if request.method == 'POST':
+        current_time = datetime.now()
+        entry = Lock.objects.all()
+        for e in entry:
+            timestamp = e.timestamp
+
+            if timestamp.day == current_time.day:
+                if timestamp.hour == current_time.hour:
+                    if current_time.minute - timestamp.minute <= 5:
+                        continue
+            e.delete()
+
+        obj = Lock()
+        obj.username = request.POST.get('username')
+        obj.timestamp = datetime.now()
+        obj.save()
+
         username = request.POST.get('username')
         password = request.POST.get('password')
         user_type = request.POST.get('type')
-        name = ""
-        flag = 0
-        if user_type == 'student':
-            users = Student.objects.all()
-            for e in users:
-                if e.username == username:
-                    name = e.first_name + e.last_name
-                    flag = 1
-                    break
-        elif user_type == 'advisor':
-            users = Advisor.objects.all()
-            for e in users:
-                if e.username == username:
-                    name = e.first_name + e.last_name
-                    flag = 1
-                    break
-        elif user_type == 'faculty':
-            users = Faculty.objects.all()
-            for e in users:
-                if e.username == username:
-                    flag = 1
-                    break
 
+        entry = Lock.objects.filter(username=username)
+        count = 0
+        for e in entry:
+            count += 1
+
+        if count >= 5:
+            messages.info(request, 'You have typed incorrect username/password too many time. Try after few minutes!')
         else:
-            users = Coe.objects.all()
-            for e in users:
-                if e.username == username:
-                    flag = 1
-                    break
-
-        user = authenticate(request, username=username, password=password)
-
-        if user is not None and flag == 1:
-            login(request, user)
+            flag = 0
             if user_type == 'student':
-                return redirect(view_profile_student_view)
+                users = Student.objects.all()
+                for e in users:
+                    if e.username == username:
+                        name = e.first_name + e.last_name
+                        flag = 1
+                        break
             elif user_type == 'advisor':
-                return redirect(view_profile_advisor_view)
+                users = Advisor.objects.all()
+                for e in users:
+                    if e.username == username:
+                        name = e.first_name + e.last_name
+                        flag = 1
+                        break
             elif user_type == 'faculty':
-                return redirect(view_profile_faculty_view)
+                users = Faculty.objects.all()
+                for e in users:
+                    if e.username == username:
+                        flag = 1
+                        break
+
             else:
-                return redirect(view_profile_coe_view)
-        else:
-            messages.info(request, 'Username or password is incorrect')
+                users = Coe.objects.all()
+                for e in users:
+                    if e.username == username:
+                        flag = 1
+                        break
+
+            user = authenticate(request, username=username, password=password)
+
+            if user is not None and flag == 1:
+                entry = Lock.objects.filter(username=username)
+                for e in entry:
+                    e.delete()
+                login(request, user)
+                if user_type == 'student':
+                    return redirect(view_profile_student_view)
+                elif user_type == 'advisor':
+                    return redirect(view_profile_advisor_view)
+                elif user_type == 'faculty':
+                    return redirect(view_profile_faculty_view)
+                else:
+                    return redirect(view_profile_coe_view)
+            else:
+                messages.info(request, 'Username or password is incorrect')
 
     return render(request, 'login.html')
 
@@ -113,6 +141,7 @@ def view_marks_advisor_view(request):
     entry1 = Advisor.objects.get(username=username)
     entry2 = Course.objects.filter(year=entry1.year)
     entry3 = Student.objects.filter(year=entry1.year)
+
     roll = {}
     for i in entry3:
         roll[i.username] = i.roll_number
@@ -128,7 +157,6 @@ def view_marks_advisor_view(request):
     print(course_mark)
 
     context = {'e1': entry1, 'e2': entry2, 'e3': entry3, 'roll': roll, 'mark': course_mark}
-    print(entry3)
     return render(request, 'Advisor/view_marks.html', context)
 
 
@@ -137,7 +165,7 @@ def approve_events_view(request):
         entry = Student.objects.all()
         for i in entry:
             if request.POST.get(i.username + "+name"):
-                events = request.POST.get(i.username+"+event")
+                events = request.POST.get(i.username + "+event")
                 print(i.username, events)
                 row_entry = Event.objects.get(username=i.username)
                 row_entry.is_approved = True
@@ -386,12 +414,9 @@ def grace_mark_calculate_view(request, year):
     if request.method == 'POST':
         username = request.user.username
         coe_entry = Coe.objects.get(username=username)
-        bool_entry = BoolCheck.objects.get(s_no=1)
 
         coe_entry.grace_mark_applied = True
         coe_entry.save(update_fields=['grace_mark_applied'])
-        bool_entry.grace_mark_applied = True
-        bool_entry.save(update_fields=['grace_mark_applied'])
 
         student_entry = Student.objects.filter(year=year)
         course_entry = Course.objects.filter(year=year)
@@ -634,5 +659,5 @@ def events_form(request):
         eventobj.save(update_fields = ['no_of_events'])
 
     context = {'e1': entry1, 'e2': eventobj}
-    return render(request, 'Student/events_form.html', context)
+    return render(request, 'Student/Events_form.html', context)
 
